@@ -9,21 +9,21 @@ export default function Hero() {
   return (
     <section
       id="hero"
-      className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden"
-      style={{ background: 'linear-gradient(135deg, var(--color-cream) 0%, var(--color-cream-dark) 50%, var(--color-rose-light) 100%)' }}
+      className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden grain-texture"
+      style={{ background: 'linear-gradient(170deg, var(--color-cream) 0%, var(--color-linen) 40%, var(--color-rose-light) 100%)' }}
     >
       {/* Decorative watercolor blobs */}
       <div
         className="watercolor-blob watercolor-blob-rose"
-        style={{ width: '500px', height: '500px', top: '-100px', right: '-150px', borderRadius: '50%' }}
+        style={{ width: '700px', height: '700px', top: '-200px', right: '-250px', borderRadius: '50%' }}
       />
       <div
         className="watercolor-blob watercolor-blob-sage"
-        style={{ width: '400px', height: '400px', bottom: '-80px', left: '-120px', borderRadius: '50%' }}
+        style={{ width: '600px', height: '600px', bottom: '-180px', left: '-250px', borderRadius: '50%' }}
       />
       <div
         className="watercolor-blob watercolor-blob-gold"
-        style={{ width: '300px', height: '300px', top: '20%', left: '10%', borderRadius: '50%' }}
+        style={{ width: '400px', height: '400px', top: '12%', left: '5%', borderRadius: '50%', opacity: 0.05 }}
       />
 
       <div className="relative z-10 text-center px-6 max-w-4xl mx-auto">
@@ -31,9 +31,9 @@ export default function Hero() {
         <motion.p
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-          className="text-xs md:text-sm uppercase tracking-[0.35em] text-rose-dark mb-6"
-          style={{ fontFamily: 'var(--font-body)' }}
+          transition={{ duration: 1, delay: 0.3, ease: [0.25, 0.8, 0.25, 1] }}
+          className="text-charcoal-muted mb-10"
+          style={{ fontFamily: 'var(--font-body)', fontSize: '0.65rem', fontWeight: 400, letterSpacing: '0.45em', textTransform: 'uppercase' }}
         >
           Ci Sposiamo
         </motion.p>
@@ -42,38 +42,43 @@ export default function Hero() {
         <motion.h1
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, delay: 0.4 }}
-          className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl mb-4"
-          style={{ fontFamily: 'var(--font-heading)', fontWeight: 300, lineHeight: 1.1 }}
+          transition={{ duration: 1.2, delay: 0.5, ease: [0.25, 0.8, 0.25, 1] }}
+          className="mb-8"
+          style={{ fontFamily: 'var(--font-heading)', fontWeight: 300, lineHeight: 1.05 }}
         >
-          <span className="text-charcoal">Ele</span>
-          <span className="text-rose mx-3 md:mx-5 inline-block" style={{ fontStyle: 'italic', fontWeight: 300 }}>&</span>
-          <span className="text-charcoal">Davi</span>
+          <span className="text-charcoal text-6xl sm:text-7xl md:text-8xl lg:text-[7.5rem]">Ele</span>
+          <span
+            className="text-rose-dark mx-5 md:mx-8 inline-block text-5xl sm:text-6xl md:text-7xl lg:text-[5.5rem]"
+            style={{ fontStyle: 'italic', fontWeight: 300 }}
+          >
+            &
+          </span>
+          <span className="text-charcoal text-6xl sm:text-7xl md:text-8xl lg:text-[7.5rem]">Davi</span>
         </motion.h1>
 
         {/* Decorative line */}
         <motion.div
           initial={{ scaleX: 0 }}
           animate={{ scaleX: 1 }}
-          transition={{ duration: 0.8, delay: 0.8 }}
-          className="decorative-line my-6 md:my-8"
+          transition={{ duration: 1, delay: 1, ease: [0.25, 0.8, 0.25, 1] }}
+          className="decorative-line-wide my-10 md:my-12"
         />
 
         {/* Date and location */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 1 }}
+          transition={{ duration: 0.8, delay: 1.2 }}
         >
           <p
-            className="text-lg md:text-xl text-charcoal-light mb-2"
-            style={{ fontFamily: 'var(--font-heading)', fontWeight: 400, letterSpacing: '0.05em' }}
+            className="text-charcoal mb-3"
+            style={{ fontFamily: 'var(--font-heading)', fontWeight: 400, fontSize: 'clamp(1.1rem, 2.5vw, 1.5rem)', letterSpacing: '0.08em' }}
           >
             6 Giugno 2026
           </p>
           <p
-            className="text-xs md:text-sm uppercase tracking-[0.2em] text-rose-dark"
-            style={{ fontFamily: 'var(--font-body)' }}
+            className="text-charcoal-muted"
+            style={{ fontFamily: 'var(--font-body)', fontSize: '0.65rem', fontWeight: 400, letterSpacing: '0.3em', textTransform: 'uppercase' }}
           >
             Corte Maddalena &middot; Capoterra &middot; Sardegna
           </p>
@@ -83,25 +88,25 @@ export default function Hero() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 1.3 }}
-          className="mt-12 md:mt-16"
+          transition={{ duration: 0.8, delay: 1.5 }}
+          className="mt-16 md:mt-24"
         >
           {isOver ? (
             <p
               className="text-2xl md:text-3xl text-charcoal"
-              style={{ fontFamily: 'var(--font-heading)', fontStyle: 'italic' }}
+              style={{ fontFamily: 'var(--font-heading)', fontStyle: 'italic', fontWeight: 300 }}
             >
               Finalmente sposi!
             </p>
           ) : (
-            <div className="flex items-center justify-center gap-4 sm:gap-6 md:gap-10">
+            <div className="flex items-center justify-center gap-6 sm:gap-8 md:gap-14">
               <CountdownUnit value={days} label="Giorni" />
-              <span className="text-rose text-2xl md:text-3xl" style={{ fontFamily: 'var(--font-heading)' }}>:</span>
+              <CountdownSeparator />
               <CountdownUnit value={hours} label="Ore" />
-              <span className="text-rose text-2xl md:text-3xl" style={{ fontFamily: 'var(--font-heading)' }}>:</span>
+              <CountdownSeparator />
               <CountdownUnit value={minutes} label="Minuti" />
-              <span className="text-rose text-2xl md:text-3xl hidden sm:block" style={{ fontFamily: 'var(--font-heading)' }}>:</span>
-              <div className="hidden sm:block">
+              <div className="hidden sm:flex items-center gap-8 md:gap-14">
+                <CountdownSeparator />
                 <CountdownUnit value={seconds} label="Secondi" />
               </div>
             </div>
@@ -112,8 +117,8 @@ export default function Hero() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 1.6 }}
-          className="mt-12"
+          transition={{ duration: 0.8, delay: 1.8 }}
+          className="mt-16 md:mt-20"
         >
           <a href="#rsvp" className="btn-primary">
             Conferma la tua Presenza
@@ -125,20 +130,20 @@ export default function Hero() {
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ duration: 1, delay: 2 }}
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
+        transition={{ duration: 1, delay: 2.5 }}
+        className="absolute bottom-12 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3"
       >
         <span
-          className="text-[10px] uppercase tracking-[0.3em] text-rose-dark"
-          style={{ fontFamily: 'var(--font-body)' }}
+          className="text-charcoal-muted"
+          style={{ fontFamily: 'var(--font-body)', fontSize: '0.55rem', letterSpacing: '0.35em', textTransform: 'uppercase' }}
         >
           Scorri
         </span>
         <motion.div
-          animate={{ y: [0, 8, 0] }}
-          transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+          animate={{ y: [0, 6, 0] }}
+          transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
         >
-          <ChevronDown size={20} className="text-rose" />
+          <ChevronDown size={18} className="text-rose-dark" strokeWidth={1.5} />
         </motion.div>
       </motion.div>
     </section>
@@ -149,17 +154,26 @@ function CountdownUnit({ value, label }) {
   return (
     <div className="text-center">
       <span
-        className="block text-3xl sm:text-4xl md:text-5xl text-charcoal tabular-nums"
-        style={{ fontFamily: 'var(--font-heading)', fontWeight: 300 }}
+        className="block text-charcoal tabular-nums"
+        style={{ fontFamily: 'var(--font-heading)', fontWeight: 300, fontSize: 'clamp(2.25rem, 5vw, 3.75rem)', lineHeight: 1 }}
       >
         {String(value).padStart(2, '0')}
       </span>
       <span
-        className="block text-[9px] md:text-[10px] uppercase tracking-[0.2em] text-charcoal-light mt-1"
-        style={{ fontFamily: 'var(--font-body)' }}
+        className="block text-charcoal-muted mt-3"
+        style={{ fontFamily: 'var(--font-body)', fontSize: '0.5rem', fontWeight: 400, letterSpacing: '0.3em', textTransform: 'uppercase' }}
       >
         {label}
       </span>
+    </div>
+  );
+}
+
+function CountdownSeparator() {
+  return (
+    <div className="flex flex-col items-center gap-1.5 -mt-3">
+      <div className="w-1 h-1 rounded-full bg-gold" />
+      <div className="w-1 h-1 rounded-full bg-gold opacity-40" />
     </div>
   );
 }

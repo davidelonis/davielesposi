@@ -32,22 +32,30 @@ export default function GuestBook() {
   };
 
   return (
-    <section className="section-padding relative" style={{ background: 'linear-gradient(180deg, var(--color-warm-white) 0%, var(--color-cream) 100%)' }}>
+    <section
+      className="section-padding relative overflow-hidden"
+      style={{ background: 'linear-gradient(180deg, var(--color-warm-white) 0%, var(--color-cream) 100%)' }}
+    >
+      <div
+        className="watercolor-blob watercolor-blob-rose"
+        style={{ width: '400px', height: '400px', top: '-100px', right: '-150px', borderRadius: '50%' }}
+      />
+
       <div className="max-w-3xl mx-auto relative z-10">
         {/* Header */}
-        <div ref={headerRef} className="text-center mb-12">
+        <div ref={headerRef} className="text-center mb-16 md:mb-20">
           <motion.p
             initial={{ opacity: 0, y: 10 }}
             animate={headerInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.6 }}
-            className="section-subtitle mb-4"
+            transition={{ duration: 0.8 }}
+            className="section-subtitle mb-5"
           >
             I vostri auguri
           </motion.p>
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
             animate={headerInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.8, delay: 0.1 }}
+            transition={{ duration: 1, delay: 0.1 }}
             className="section-title"
           >
             Guest Book
@@ -55,18 +63,18 @@ export default function GuestBook() {
           <motion.div
             initial={{ scaleX: 0 }}
             animate={headerInView ? { scaleX: 1 } : {}}
-            transition={{ duration: 0.6, delay: 0.3 }}
+            transition={{ duration: 0.8, delay: 0.3 }}
             className="decorative-line"
           />
         </div>
 
         {/* Add message button */}
-        <div className="text-center mb-10">
+        <div className="text-center mb-12">
           <button
             onClick={() => setShowForm(!showForm)}
             className="btn-outline inline-flex items-center gap-2"
           >
-            <MessageSquareHeart size={16} />
+            <MessageSquareHeart size={14} />
             {showForm ? 'Chiudi' : 'Lascia un messaggio'}
           </button>
         </div>
@@ -78,30 +86,48 @@ export default function GuestBook() {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.3 }}
+              transition={{ duration: 0.4, ease: [0.25, 0.8, 0.25, 1] }}
               onSubmit={handleSubmit}
-              className="overflow-hidden mb-10"
+              className="overflow-hidden mb-12"
             >
-              <div className="bg-warm-white p-6 rounded-sm border border-rose-light/20">
-                <div className="mb-4">
+              <div
+                className="p-7 md:p-8"
+                style={{
+                  background: 'var(--color-warm-white)',
+                  border: '1px solid rgba(196, 166, 161, 0.12)',
+                  borderRadius: '2px',
+                  boxShadow: '0 2px 20px rgba(46, 44, 42, 0.03)',
+                }}
+              >
+                <div className="mb-5">
                   <input
                     type="text"
                     placeholder="Il tuo nome"
                     value={newMsg.name}
                     onChange={(e) => setNewMsg({ ...newMsg, name: e.target.value })}
-                    className="w-full px-4 py-3 bg-cream border border-rose-light/50 text-charcoal text-sm focus:border-rose transition-colors"
-                    style={{ fontFamily: 'var(--font-body)' }}
+                    className="w-full px-5 py-3.5 text-sm text-charcoal"
+                    style={{
+                      fontFamily: 'var(--font-body)',
+                      background: 'var(--color-cream)',
+                      border: '1px solid rgba(196, 166, 161, 0.25)',
+                      borderRadius: '2px',
+                    }}
                     required
                   />
                 </div>
-                <div className="mb-4">
+                <div className="mb-5">
                   <textarea
                     placeholder="Il tuo messaggio per gli sposi..."
                     rows={3}
                     value={newMsg.message}
                     onChange={(e) => setNewMsg({ ...newMsg, message: e.target.value })}
-                    className="w-full px-4 py-3 bg-cream border border-rose-light/50 text-charcoal text-sm focus:border-rose transition-colors resize-none"
-                    style={{ fontFamily: 'var(--font-body)' }}
+                    className="w-full px-5 py-3.5 text-sm text-charcoal resize-none"
+                    style={{
+                      fontFamily: 'var(--font-body)',
+                      background: 'var(--color-cream)',
+                      border: '1px solid rgba(196, 166, 161, 0.25)',
+                      borderRadius: '2px',
+                    }}
                     required
                   />
                 </div>
@@ -114,35 +140,44 @@ export default function GuestBook() {
         </AnimatePresence>
 
         {/* Messages */}
-        <div className="space-y-4">
+        <div className="space-y-5">
           {messages.map((msg, index) => (
             <motion.div
               key={msg.id}
               initial={{ opacity: 0, y: 15 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.4, delay: index * 0.06 }}
-              className="p-5 bg-warm-white rounded-sm border border-rose-light/15"
+              transition={{ duration: 0.5, delay: index * 0.06, ease: [0.25, 0.8, 0.25, 1] }}
+              className="p-6"
+              style={{
+                background: 'var(--color-warm-white)',
+                border: '1px solid rgba(196, 166, 161, 0.1)',
+                borderRadius: '2px',
+                boxShadow: '0 2px 12px rgba(46, 44, 42, 0.02)',
+              }}
             >
-              <div className="flex items-start gap-3">
-                <div className="w-9 h-9 rounded-full bg-rose-light/30 flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <Heart size={14} className="text-rose-dark" />
+              <div className="flex items-start gap-4">
+                <div
+                  className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5"
+                  style={{ background: 'rgba(196, 166, 161, 0.1)' }}
+                >
+                  <Heart size={13} className="text-rose-dark" strokeWidth={1.5} />
                 </div>
                 <div>
-                  <div className="flex items-baseline gap-3 mb-1">
+                  <div className="flex items-baseline gap-3 mb-2">
                     <span
-                      className="text-sm text-charcoal"
-                      style={{ fontFamily: 'var(--font-heading)', fontWeight: 500 }}
+                      className="text-charcoal"
+                      style={{ fontFamily: 'var(--font-heading)', fontWeight: 500, fontSize: '1rem' }}
                     >
                       {msg.name}
                     </span>
-                    <span className="text-[10px] text-charcoal-light" style={{ fontFamily: 'var(--font-body)' }}>
+                    <span className="text-charcoal-muted" style={{ fontFamily: 'var(--font-body)', fontSize: '0.6rem', letterSpacing: '0.05em' }}>
                       {msg.date}
                     </span>
                   </div>
                   <p
-                    className="text-sm text-charcoal-light leading-relaxed"
-                    style={{ fontFamily: 'var(--font-body)', fontWeight: 300 }}
+                    className="text-charcoal-muted"
+                    style={{ fontFamily: 'var(--font-body)', fontWeight: 300, fontSize: '0.825rem', lineHeight: 1.85 }}
                   >
                     {msg.message}
                   </p>

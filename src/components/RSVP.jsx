@@ -38,23 +38,27 @@ export default function RSVP() {
   return (
     <section
       id="rsvp"
-      className="section-padding relative"
-      style={{ background: 'linear-gradient(180deg, var(--color-cream) 0%, var(--color-rose-light) 50%, var(--color-cream) 100%)', opacity: 0.97 }}
+      className="section-padding relative overflow-hidden"
+      style={{ background: 'var(--color-linen)' }}
     >
-      {/* Background pattern */}
-      <div className="absolute inset-0 opacity-5" style={{
-        backgroundImage: 'radial-gradient(circle at 20% 50%, var(--color-rose) 1px, transparent 1px), radial-gradient(circle at 80% 50%, var(--color-sage) 1px, transparent 1px)',
-        backgroundSize: '60px 60px',
-      }} />
+      {/* Decorative blobs */}
+      <div
+        className="watercolor-blob watercolor-blob-rose"
+        style={{ width: '600px', height: '600px', top: '-200px', right: '-250px', borderRadius: '50%' }}
+      />
+      <div
+        className="watercolor-blob watercolor-blob-sage"
+        style={{ width: '500px', height: '500px', bottom: '-180px', left: '-200px', borderRadius: '50%' }}
+      />
 
       <div className="max-w-2xl mx-auto relative z-10">
         {/* Header */}
-        <div ref={headerRef} className="text-center mb-12 md:mb-16">
+        <div ref={headerRef} className="text-center mb-16 md:mb-20">
           <motion.p
             initial={{ opacity: 0, y: 10 }}
             animate={headerInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.6 }}
-            className="section-subtitle mb-4"
+            className="section-subtitle mb-5"
           >
             Vi aspettiamo
           </motion.p>
@@ -76,10 +80,10 @@ export default function RSVP() {
             initial={{ opacity: 0 }}
             animate={headerInView ? { opacity: 1 } : {}}
             transition={{ duration: 0.6, delay: 0.5 }}
-            className="text-sm text-charcoal-light mt-6"
-            style={{ fontFamily: 'var(--font-body)' }}
+            className="text-charcoal-muted mt-8"
+            style={{ fontFamily: 'var(--font-body)', fontSize: '0.825rem', fontWeight: 300 }}
           >
-            Per favore conferma entro il <strong>10 Maggio 2026</strong>
+            Per favore conferma entro il <strong style={{ fontWeight: 500 }}>10 Maggio 2026</strong>
           </motion.p>
         </div>
 
@@ -89,23 +93,29 @@ export default function RSVP() {
               key="success"
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="text-center py-16"
+              className="text-center py-20"
             >
-              <div className="w-20 h-20 rounded-full bg-sage-light/50 flex items-center justify-center mx-auto mb-6">
-                <Check size={32} className="text-sage-dark" />
+              <div
+                className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-8"
+                style={{ background: 'rgba(154, 173, 138, 0.15)' }}
+              >
+                <Check size={28} className="text-sage-dark" strokeWidth={1.5} />
               </div>
               <h3
-                className="text-2xl md:text-3xl text-charcoal mb-4"
+                className="text-2xl md:text-3xl text-charcoal mb-5"
                 style={{ fontFamily: 'var(--font-heading)', fontWeight: 400 }}
               >
                 Grazie!
               </h3>
-              <p className="text-charcoal-light" style={{ fontFamily: 'var(--font-body)' }}>
+              <p
+                className="text-charcoal-muted mb-10"
+                style={{ fontFamily: 'var(--font-body)', fontSize: '0.875rem', fontWeight: 300 }}
+              >
                 La tua conferma è stata ricevuta. Non vediamo l'ora di festeggiare con te!
               </p>
               <button
                 onClick={() => setSubmitted(false)}
-                className="btn-outline mt-8"
+                className="btn-outline"
               >
                 Invia un'altra conferma
               </button>
@@ -117,14 +127,20 @@ export default function RSVP() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               onSubmit={handleSubmit(onSubmit)}
-              className="bg-warm-white/80 backdrop-blur-sm p-8 md:p-12 rounded-sm shadow-sm"
+              className="p-8 md:p-12 lg:p-14"
+              style={{
+                background: 'var(--color-warm-white)',
+                border: '1px solid rgba(196, 166, 161, 0.12)',
+                borderRadius: '2px',
+                boxShadow: '0 4px 32px rgba(46, 44, 42, 0.04)',
+              }}
             >
               {/* Name */}
-              <div className="mb-6">
+              <div className="mb-7">
                 <label
                   htmlFor="name"
-                  className="block text-xs uppercase tracking-[0.15em] text-charcoal-light mb-2"
-                  style={{ fontFamily: 'var(--font-body)' }}
+                  className="block mb-2.5"
+                  style={{ fontFamily: 'var(--font-body)', fontSize: '0.65rem', fontWeight: 500, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--color-charcoal-muted)' }}
                 >
                   Nome e Cognome *
                 </label>
@@ -132,23 +148,28 @@ export default function RSVP() {
                   id="name"
                   type="text"
                   {...register('name', { required: 'Il nome è obbligatorio' })}
-                  className="w-full px-4 py-3 bg-cream border border-rose-light/50 text-charcoal text-sm placeholder-charcoal-light/40 focus:border-rose transition-colors"
-                  style={{ fontFamily: 'var(--font-body)' }}
+                  className="w-full px-5 py-3.5 text-sm text-charcoal"
+                  style={{
+                    fontFamily: 'var(--font-body)',
+                    background: 'var(--color-cream)',
+                    border: '1px solid rgba(196, 166, 161, 0.25)',
+                    borderRadius: '2px',
+                  }}
                   placeholder="Es: Mario Rossi"
                 />
                 {errors.name && (
-                  <p className="text-xs text-rose-dark mt-1 flex items-center gap-1">
+                  <p className="flex items-center gap-1.5 mt-2" style={{ fontFamily: 'var(--font-body)', fontSize: '0.7rem', color: 'var(--color-rose-dark)' }}>
                     <AlertCircle size={12} /> {errors.name.message}
                   </p>
                 )}
               </div>
 
               {/* Email */}
-              <div className="mb-6">
+              <div className="mb-7">
                 <label
                   htmlFor="email"
-                  className="block text-xs uppercase tracking-[0.15em] text-charcoal-light mb-2"
-                  style={{ fontFamily: 'var(--font-body)' }}
+                  className="block mb-2.5"
+                  style={{ fontFamily: 'var(--font-body)', fontSize: '0.65rem', fontWeight: 500, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--color-charcoal-muted)' }}
                 >
                   Email *
                 </label>
@@ -159,70 +180,80 @@ export default function RSVP() {
                     required: "L'email è obbligatoria",
                     pattern: { value: /^\S+@\S+$/i, message: 'Email non valida' },
                   })}
-                  className="w-full px-4 py-3 bg-cream border border-rose-light/50 text-charcoal text-sm placeholder-charcoal-light/40 focus:border-rose transition-colors"
-                  style={{ fontFamily: 'var(--font-body)' }}
+                  className="w-full px-5 py-3.5 text-sm text-charcoal"
+                  style={{
+                    fontFamily: 'var(--font-body)',
+                    background: 'var(--color-cream)',
+                    border: '1px solid rgba(196, 166, 161, 0.25)',
+                    borderRadius: '2px',
+                  }}
                   placeholder="Es: mario@email.com"
                 />
                 {errors.email && (
-                  <p className="text-xs text-rose-dark mt-1 flex items-center gap-1">
+                  <p className="flex items-center gap-1.5 mt-2" style={{ fontFamily: 'var(--font-body)', fontSize: '0.7rem', color: 'var(--color-rose-dark)' }}>
                     <AlertCircle size={12} /> {errors.email.message}
                   </p>
                 )}
               </div>
 
               {/* Attendance */}
-              <div className="mb-6">
+              <div className="mb-7">
                 <label
-                  className="block text-xs uppercase tracking-[0.15em] text-charcoal-light mb-2"
-                  style={{ fontFamily: 'var(--font-body)' }}
+                  className="block mb-3"
+                  style={{ fontFamily: 'var(--font-body)', fontSize: '0.65rem', fontWeight: 500, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--color-charcoal-muted)' }}
                 >
                   Parteciperai? *
                 </label>
-                <div className="flex gap-4">
-                  <label className="flex items-center gap-2 cursor-pointer">
+                <div className="flex gap-6">
+                  <label className="flex items-center gap-2.5 cursor-pointer">
                     <input
                       type="radio"
                       value="yes"
                       {...register('attendance', { required: 'Seleziona una risposta' })}
                       className="accent-rose-dark"
                     />
-                    <span className="text-sm text-charcoal" style={{ fontFamily: 'var(--font-body)' }}>
+                    <span className="text-charcoal" style={{ fontFamily: 'var(--font-body)', fontSize: '0.825rem', fontWeight: 300 }}>
                       Con gioia, ci sarò!
                     </span>
                   </label>
-                  <label className="flex items-center gap-2 cursor-pointer">
+                  <label className="flex items-center gap-2.5 cursor-pointer">
                     <input
                       type="radio"
                       value="no"
                       {...register('attendance', { required: 'Seleziona una risposta' })}
                       className="accent-rose-dark"
                     />
-                    <span className="text-sm text-charcoal" style={{ fontFamily: 'var(--font-body)' }}>
+                    <span className="text-charcoal" style={{ fontFamily: 'var(--font-body)', fontSize: '0.825rem', fontWeight: 300 }}>
                       Purtroppo no
                     </span>
                   </label>
                 </div>
                 {errors.attendance && (
-                  <p className="text-xs text-rose-dark mt-1 flex items-center gap-1">
+                  <p className="flex items-center gap-1.5 mt-2" style={{ fontFamily: 'var(--font-body)', fontSize: '0.7rem', color: 'var(--color-rose-dark)' }}>
                     <AlertCircle size={12} /> {errors.attendance.message}
                   </p>
                 )}
               </div>
 
               {/* Number of guests */}
-              <div className="mb-6">
+              <div className="mb-7">
                 <label
                   htmlFor="guests"
-                  className="block text-xs uppercase tracking-[0.15em] text-charcoal-light mb-2"
-                  style={{ fontFamily: 'var(--font-body)' }}
+                  className="block mb-2.5"
+                  style={{ fontFamily: 'var(--font-body)', fontSize: '0.65rem', fontWeight: 500, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--color-charcoal-muted)' }}
                 >
                   Numero di ospiti (te incluso)
                 </label>
                 <select
                   id="guests"
                   {...register('guests')}
-                  className="w-full px-4 py-3 bg-cream border border-rose-light/50 text-charcoal text-sm focus:border-rose transition-colors"
-                  style={{ fontFamily: 'var(--font-body)' }}
+                  className="w-full px-5 py-3.5 text-sm text-charcoal"
+                  style={{
+                    fontFamily: 'var(--font-body)',
+                    background: 'var(--color-cream)',
+                    border: '1px solid rgba(196, 166, 161, 0.25)',
+                    borderRadius: '2px',
+                  }}
                 >
                   <option value="1">1</option>
                   <option value="2">2</option>
@@ -233,11 +264,11 @@ export default function RSVP() {
               </div>
 
               {/* Dietary restrictions */}
-              <div className="mb-6">
+              <div className="mb-7">
                 <label
                   htmlFor="dietary"
-                  className="block text-xs uppercase tracking-[0.15em] text-charcoal-light mb-2"
-                  style={{ fontFamily: 'var(--font-body)' }}
+                  className="block mb-2.5"
+                  style={{ fontFamily: 'var(--font-body)', fontSize: '0.65rem', fontWeight: 500, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--color-charcoal-muted)' }}
                 >
                   Allergie o restrizioni alimentari
                 </label>
@@ -245,18 +276,23 @@ export default function RSVP() {
                   id="dietary"
                   type="text"
                   {...register('dietary')}
-                  className="w-full px-4 py-3 bg-cream border border-rose-light/50 text-charcoal text-sm placeholder-charcoal-light/40 focus:border-rose transition-colors"
-                  style={{ fontFamily: 'var(--font-body)' }}
+                  className="w-full px-5 py-3.5 text-sm text-charcoal"
+                  style={{
+                    fontFamily: 'var(--font-body)',
+                    background: 'var(--color-cream)',
+                    border: '1px solid rgba(196, 166, 161, 0.25)',
+                    borderRadius: '2px',
+                  }}
                   placeholder="Es: Vegetariano, intolleranza al glutine..."
                 />
               </div>
 
               {/* Message */}
-              <div className="mb-8">
+              <div className="mb-10">
                 <label
                   htmlFor="message"
-                  className="block text-xs uppercase tracking-[0.15em] text-charcoal-light mb-2"
-                  style={{ fontFamily: 'var(--font-body)' }}
+                  className="block mb-2.5"
+                  style={{ fontFamily: 'var(--font-body)', fontSize: '0.65rem', fontWeight: 500, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--color-charcoal-muted)' }}
                 >
                   Messaggio per gli sposi (opzionale)
                 </label>
@@ -264,15 +300,29 @@ export default function RSVP() {
                   id="message"
                   {...register('message')}
                   rows={4}
-                  className="w-full px-4 py-3 bg-cream border border-rose-light/50 text-charcoal text-sm placeholder-charcoal-light/40 focus:border-rose transition-colors resize-none"
-                  style={{ fontFamily: 'var(--font-body)' }}
+                  className="w-full px-5 py-3.5 text-sm text-charcoal resize-none"
+                  style={{
+                    fontFamily: 'var(--font-body)',
+                    background: 'var(--color-cream)',
+                    border: '1px solid rgba(196, 166, 161, 0.25)',
+                    borderRadius: '2px',
+                  }}
                   placeholder="Un pensiero, un augurio, una barzelletta..."
                 />
               </div>
 
               {/* Error message */}
               {error && (
-                <div className="mb-6 p-4 bg-rose-light/30 text-rose-dark text-sm rounded-sm flex items-center gap-2">
+                <div
+                  className="mb-8 p-4 flex items-center gap-2.5"
+                  style={{
+                    fontFamily: 'var(--font-body)',
+                    fontSize: '0.825rem',
+                    background: 'rgba(196, 166, 161, 0.12)',
+                    color: 'var(--color-rose-dark)',
+                    borderRadius: '2px',
+                  }}
+                >
                   <AlertCircle size={16} /> {error}
                 </div>
               )}
@@ -290,7 +340,7 @@ export default function RSVP() {
                   </span>
                 ) : (
                   <span className="flex items-center gap-2">
-                    <Send size={16} />
+                    <Send size={14} />
                     Invia Conferma
                   </span>
                 )}
