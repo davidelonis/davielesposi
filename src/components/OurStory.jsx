@@ -1,9 +1,33 @@
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useInView } from '../hooks/useInView';
 import content from '../data/content.json';
 
 export default function OurStory() {
   const [headerRef, headerInView] = useInView({ threshold: 0.2 });
+  const [storyImages, setStoryImages] = useState([]);
+
+  // Load story images from manifest
+  useEffect(() => {
+    fetch('/images/gallery/manifest.json')
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.story && data.story.length > 0) {
+          setStoryImages(data.story);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  // Use manifest story entries if available, otherwise fall back to content.json
+  const moments = storyImages.length > 0
+    ? storyImages.map((img) => ({
+        year: img.year || '',
+        title: img.title || '',
+        description: img.description || '',
+        image: img.src,
+      }))
+    : content.ourStory;
 
   return (
     <section id="storia" className="section-padding relative overflow-hidden">
@@ -45,8 +69,14 @@ export default function OurStory() {
           {/* Vertical line */}
           <div className="hidden md:block absolute left-1/2 top-0 bottom-0 w-px bg-rose-light -translate-x-1/2" />
 
-          {content.ourStory.map((moment, index) => (
-            <TimelineItem key={index} moment={moment} index={index} isEven={index % 2 === 0} />
+          {moments.map((moment, index) => (
+            <TimelineItem
+              key={index}
+              moment={moment}
+              index={index}
+              isEven={index % 2 === 0}
+              hasImage={!!moment.image && storyImages.length > 0}
+            />
           ))}
         </div>
 
@@ -70,8 +100,9 @@ export default function OurStory() {
   );
 }
 
-function TimelineItem({ moment, index, isEven }) {
+function TimelineItem({ moment, index, isEven, hasImage }) {
   const [ref, inView] = useInView({ threshold: 0.2 });
+  const fallbackEmojis = ['💫', '🌅', '🏠', '💍'];
 
   return (
     <div
@@ -131,7 +162,7 @@ function TimelineItem({ moment, index, isEven }) {
       {/* Spacer for the center column */}
       <div className="hidden md:block w-2/12" />
 
-      {/* Image placeholder */}
+      {/* Image */}
       <motion.div
         initial={{ opacity: 0, x: isEven ? 50 : -50 }}
         animate={inView ? { opacity: 1, x: 0 } : {}}
@@ -139,16 +170,25 @@ function TimelineItem({ moment, index, isEven }) {
         className={`w-full md:w-5/12 mt-6 md:mt-0 ${isEven ? 'md:pl-16' : 'md:pr-16'}`}
       >
         <div className="relative aspect-[4/3] bg-cream-dark rounded-sm overflow-hidden group">
-          <div className="absolute inset-0 flex items-center justify-center text-charcoal-light">
-            <div className="text-center">
-              <span className="text-4xl block mb-2">
-                {index === 0 ? '💫' : index === 1 ? '🌅' : index === 2 ? '🏠' : '💍'}
-              </span>
-              <span className="text-xs uppercase tracking-wider" style={{ fontFamily: 'var(--font-body)' }}>
-                {moment.year}
-              </span>
+          {hasImage ? (
+            <img
+              src={moment.image}
+              alt={moment.title}
+              loading="lazy"
+              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+            />
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center text-charcoal-light">
+              <div className="text-center">
+                <span className="text-4xl block mb-2">
+                  {fallbackEmojis[index % fallbackEmojis.length]}
+                </span>
+                <span className="text-xs uppercase tracking-wider" style={{ fontFamily: 'var(--font-body)' }}>
+                  {moment.year}
+                </span>
+              </div>
             </div>
-          </div>
+          )}
           <div className="absolute inset-0 bg-rose/5 group-hover:bg-rose/10 transition-colors duration-500" />
         </div>
       </motion.div>

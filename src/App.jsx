@@ -1,4 +1,4 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useState, useEffect } from 'react';
 import Navigation from './components/Navigation';
 import Hero from './components/Hero';
 import Footer from './components/Footer';
@@ -13,6 +13,7 @@ const Registry = lazy(() => import('./components/Registry'));
 const FAQ = lazy(() => import('./components/FAQ'));
 const GuestBook = lazy(() => import('./components/GuestBook'));
 const Contact = lazy(() => import('./components/Contact'));
+const AdminUpload = lazy(() => import('./components/AdminUpload'));
 
 function SectionLoader() {
   return (
@@ -30,7 +31,28 @@ function SectionLoader() {
   );
 }
 
+function useHashRoute() {
+  const [hash, setHash] = useState(window.location.hash);
+  useEffect(() => {
+    const onHashChange = () => setHash(window.location.hash);
+    window.addEventListener('hashchange', onHashChange);
+    return () => window.removeEventListener('hashchange', onHashChange);
+  }, []);
+  return hash;
+}
+
 export default function App() {
+  const hash = useHashRoute();
+
+  // Hidden admin route
+  if (hash === '#/gestione-foto-ed2026') {
+    return (
+      <Suspense fallback={<SectionLoader />}>
+        <AdminUpload />
+      </Suspense>
+    );
+  }
+
   return (
     <div className="min-h-screen">
       <Navigation />

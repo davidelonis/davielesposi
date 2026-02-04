@@ -1,19 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useInView } from '../hooks/useInView';
-
-const placeholderPhotos = [
-  { id: 1, alt: 'Ele e Davi al tramonto', category: 'together', color: '#E8D5D3', emoji: '🌅' },
-  { id: 2, alt: 'Passeggiata al mare', category: 'together', color: '#C5D4B8', emoji: '🌊' },
-  { id: 3, alt: 'Viaggio insieme', category: 'travel', color: '#D4BA8A', emoji: '✈️' },
-  { id: 4, alt: 'La proposta', category: 'engagement', color: '#E8D5D3', emoji: '💍' },
-  { id: 5, alt: 'Scherzi e risate', category: 'together', color: '#C5D4B8', emoji: '😄' },
-  { id: 6, alt: 'Avventura in montagna', category: 'travel', color: '#D4BA8A', emoji: '⛰️' },
-  { id: 7, alt: 'Cena romantica', category: 'together', color: '#E8D5D3', emoji: '🕯️' },
-  { id: 8, alt: 'Momenti speciali', category: 'engagement', color: '#C5D4B8', emoji: '✨' },
-  { id: 9, alt: 'Vacanza estiva', category: 'travel', color: '#D4BA8A', emoji: '☀️' },
-];
 
 const categories = [
   { key: 'all', label: 'Tutti' },
@@ -26,10 +14,23 @@ export default function Gallery() {
   const [headerRef, headerInView] = useInView({ threshold: 0.2 });
   const [activeCategory, setActiveCategory] = useState('all');
   const [lightboxIndex, setLightboxIndex] = useState(null);
+  const [photos, setPhotos] = useState([]);
+
+  // Load from manifest
+  useEffect(() => {
+    fetch('/images/gallery/manifest.json')
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.gallery && data.gallery.length > 0) {
+          setPhotos(data.gallery);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   const filtered = activeCategory === 'all'
-    ? placeholderPhotos
-    : placeholderPhotos.filter((p) => p.category === activeCategory);
+    ? photos
+    : photos.filter((p) => p.category === activeCategory);
 
   const openLightbox = (index) => setLightboxIndex(index);
   const closeLightbox = () => setLightboxIndex(null);
@@ -45,6 +46,11 @@ export default function Gallery() {
       setLightboxIndex((lightboxIndex - 1 + filtered.length) % filtered.length);
     }
   };
+
+  // Don't render section if no photos yet
+  if (photos.length === 0) {
+    return null;
+  }
 
   return (
     <section
@@ -97,7 +103,7 @@ export default function Gallery() {
           ))}
         </div>
 
-        {/* Photo grid - masonry-like */}
+        {/* Photo grid */}
         <motion.div
           layout
           className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4"
@@ -116,20 +122,12 @@ export default function Gallery() {
                 }`}
                 onClick={() => openLightbox(index)}
               >
-                <div
-                  className={`w-full ${index % 5 === 0 ? 'aspect-[3/4]' : 'aspect-square'} flex items-center justify-center transition-transform duration-700 group-hover:scale-105`}
-                  style={{ backgroundColor: photo.color }}
-                >
-                  <div className="text-center">
-                    <span className="text-4xl md:text-5xl block mb-2">{photo.emoji}</span>
-                    <span
-                      className="text-xs text-charcoal-light opacity-60"
-                      style={{ fontFamily: 'var(--font-body)' }}
-                    >
-                      {photo.alt}
-                    </span>
-                  </div>
-                </div>
+                <img
+                  src={photo.src}
+                  alt={photo.alt}
+                  loading="lazy"
+                  className={`w-full ${index % 5 === 0 ? 'aspect-[3/4]' : 'aspect-square'} object-cover transition-transform duration-700 group-hover:scale-105`}
+                />
                 {/* Hover overlay */}
                 <div className="absolute inset-0 bg-charcoal/0 group-hover:bg-charcoal/20 transition-all duration-500 flex items-center justify-center">
                   <span className="text-warm-white opacity-0 group-hover:opacity-100 text-xs uppercase tracking-wider transition-opacity duration-300">
@@ -140,17 +138,11 @@ export default function Gallery() {
             ))}
           </AnimatePresence>
         </motion.div>
-
-        <div className="text-center mt-10">
-          <p className="text-xs text-charcoal-light italic" style={{ fontFamily: 'var(--font-body)' }}>
-            Le foto verranno aggiornate con i nostri scatti reali
-          </p>
-        </div>
       </div>
 
       {/* Lightbox */}
       <AnimatePresence>
-        {lightboxIndex !== null && (
+        {lightboxIndex !== null && filtered[lightboxIndex] && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -180,22 +172,16 @@ export default function Gallery() {
               <ChevronRight size={36} />
             </button>
 
-            <motion.div
+            <motion.img
               key={lightboxIndex}
+              src={filtered[lightboxIndex].src}
+              alt={filtered[lightboxIndex].alt}
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="w-[80vw] max-w-2xl aspect-square flex items-center justify-center rounded-lg"
-              style={{ backgroundColor: filtered[lightboxIndex]?.color }}
+              className="max-w-[90vw] max-h-[85vh] object-contain rounded-sm"
               onClick={(e) => e.stopPropagation()}
-            >
-              <div className="text-center">
-                <span className="text-8xl block mb-4">{filtered[lightboxIndex]?.emoji}</span>
-                <p className="text-charcoal text-sm" style={{ fontFamily: 'var(--font-body)' }}>
-                  {filtered[lightboxIndex]?.alt}
-                </p>
-              </div>
-            </motion.div>
+            />
           </motion.div>
         )}
       </AnimatePresence>
