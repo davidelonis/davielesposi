@@ -131,6 +131,12 @@ export default function Registry() {
             <div className="space-y-4">
               <div className="p-4 bg-cream rounded-sm">
                 <p className="text-xs uppercase tracking-wider text-charcoal-light mb-1" style={{ fontFamily: 'var(--font-body)' }}>
+                  Intestato a
+                </p>
+                <p className="text-sm text-charcoal mb-2" style={{ fontFamily: 'var(--font-body)' }}>
+                  {content.registry.ibanHolder}
+                </p>
+                <p className="text-xs uppercase tracking-wider text-charcoal-light mb-1" style={{ fontFamily: 'var(--font-body)' }}>
                   IBAN
                 </p>
                 <p
