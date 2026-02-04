@@ -2,15 +2,14 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useInView } from '../hooks/useInView';
 import content from '../data/content.json';
-import { cloudinaryListUrl, cloudinaryImageUrl, TAGS, CLOUDINARY_CLOUD_NAME } from '../config/cloudinary';
+import { cloudinaryListUrl, cloudinaryImageUrl, TAGS, getContext } from '../config/cloudinary';
 
 export default function OurStory() {
   const [headerRef, headerInView] = useInView({ threshold: 0.2 });
   const [storyImages, setStoryImages] = useState([]);
 
-  // Load story images from Cloudinary
+  // Load story images from Cloudinary via Netlify Function
   useEffect(() => {
-    if (CLOUDINARY_CLOUD_NAME === 'YOUR_CLOUD_NAME') return;
     fetch(cloudinaryListUrl(TAGS.STORY))
       .then((r) => {
         if (!r.ok) throw new Error();
@@ -18,12 +17,15 @@ export default function OurStory() {
       })
       .then((data) => {
         if (data.resources && data.resources.length > 0) {
-          setStoryImages(data.resources.map((r) => ({
-            src: cloudinaryImageUrl(r.public_id),
-            year: r.context?.custom?.year || '',
-            title: r.context?.custom?.title || '',
-            description: r.context?.custom?.description || '',
-          })));
+          setStoryImages(data.resources.map((r) => {
+            const meta = getContext(r);
+            return {
+              src: cloudinaryImageUrl(r.public_id),
+              year: meta.year,
+              title: meta.title,
+              description: meta.description,
+            };
+          }));
         }
       })
       .catch(() => {});

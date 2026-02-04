@@ -1,13 +1,13 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Upload, Trash2, Image, BookOpen, X, Check, ArrowLeft, ExternalLink } from 'lucide-react';
+import { Upload, Trash2, Image, BookOpen, X, Check, ArrowLeft } from 'lucide-react';
 import {
   CLOUDINARY_UPLOAD_URL,
   CLOUDINARY_UPLOAD_PRESET,
-  CLOUDINARY_CLOUD_NAME,
   cloudinaryListUrl,
   cloudinaryImageUrl,
   cloudinaryThumbUrl,
   TAGS,
+  getContext,
 } from '../config/cloudinary';
 
 const CATEGORIES = [
@@ -16,7 +16,7 @@ const CATEGORIES = [
   { value: 'engagement', label: 'Fidanzamento' },
 ];
 
-const isConfigured = CLOUDINARY_CLOUD_NAME !== 'YOUR_CLOUD_NAME';
+const isConfigured = true; // Cloudinary is configured via Netlify env vars
 
 export default function AdminUpload() {
   const [images, setImages] = useState([]);
@@ -40,17 +40,20 @@ export default function AdminUpload() {
         throw new Error(`HTTP ${res.status}`);
       }
       const data = await res.json();
-      const imgs = (data.resources || []).map((r) => ({
-        id: r.public_id,
-        src: cloudinaryImageUrl(r.public_id),
-        thumb: cloudinaryThumbUrl(r.public_id),
-        alt: r.context?.custom?.alt || r.public_id.split('/').pop(),
-        category: r.context?.custom?.category || 'together',
-        year: r.context?.custom?.year || '',
-        title: r.context?.custom?.title || '',
-        description: r.context?.custom?.description || '',
-        uploadedAt: r.created_at,
-      }));
+      const imgs = (data.resources || []).map((r) => {
+        const meta = getContext(r);
+        return {
+          id: r.public_id,
+          src: cloudinaryImageUrl(r.public_id),
+          thumb: cloudinaryThumbUrl(r.public_id),
+          alt: meta.alt || r.public_id.split('/').pop(),
+          category: meta.category,
+          year: meta.year,
+          title: meta.title,
+          description: meta.description,
+          uploadedAt: r.created_at,
+        };
+      });
       setImages(imgs);
     } catch {
       // 404 means no images with this tag yet — not an error
@@ -208,17 +211,7 @@ export default function AdminUpload() {
       </div>
 
       <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '24px' }}>
-        {/* Config warning */}
-        {!isConfigured && (
-          <div style={{ padding: '16px 20px', marginBottom: '20px', background: '#fff3cd', color: '#856404', borderRadius: '4px', fontSize: '13px', lineHeight: 1.6 }}>
-            <strong>Configurazione necessaria:</strong> Apri <code>src/config/cloudinary.js</code> e sostituisci <code>YOUR_CLOUD_NAME</code> con il tuo Cloud Name di Cloudinary.
-            Devi anche creare un Upload Preset &quot;unsigned&quot; chiamato <code>wedding_ed2026</code> nel tuo account Cloudinary.
-            <br /><br />
-            <a href="https://cloudinary.com/users/register_free" target="_blank" rel="noopener noreferrer" style={{ color: '#856404' }}>
-              Crea un account gratuito su Cloudinary <ExternalLink size={12} style={{ display: 'inline', verticalAlign: 'middle' }} />
-            </a>
-          </div>
-        )}
+        {/* Config warning - Cloudinary is configured */}
 
         {/* Message */}
         {message && (
