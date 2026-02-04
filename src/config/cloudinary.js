@@ -1,6 +1,5 @@
-// Cloudinary configuration — all values are public (unsigned upload preset)
-// Replace YOUR_CLOUD_NAME with your actual Cloudinary cloud name
-export const CLOUDINARY_CLOUD_NAME = 'YOUR_CLOUD_NAME';
+// Cloudinary configuration — cloud name and preset are safe to expose publicly
+export const CLOUDINARY_CLOUD_NAME = 'ddr30jiax';
 export const CLOUDINARY_UPLOAD_PRESET = 'wedding_ed2026';
 
 export const CLOUDINARY_UPLOAD_URL =
