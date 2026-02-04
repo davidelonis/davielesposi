@@ -1,0 +1,235 @@
+{
+  "couple": {
+    "bride": {
+      "name": "Eleonora",
+      "nickname": "Ele"
+    },
+    "groom": {
+      "name": "Davide",
+      "nickname": "Davi"
+    }
+  },
+  "wedding": {
+    "date": "2026-06-06T16:00:00",
+    "location": {
+      "name": "Corte Maddalena",
+      "address": "Strada Provinciale 91, 09012 Capoterra CA, Sardegna",
+      "city": "Capoterra",
+      "region": "Sardegna",
+      "mapUrl": "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3078.5!2d8.97!3d39.17!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x12e734c0c0c0c0c1%3A0x0!2sCorte+Maddalena!5e0!3m2!1sit!2sit!4v1700000000000!5m2!1sit!2sit",
+      "mapLink": "https://maps.google.com/?q=Corte+Maddalena+Capoterra+Sardegna"
+    },
+    "rsvpDeadline": "2026-05-10",
+    "dressCode": "Elegante"
+  },
+  "timeline": [
+    {
+      "time": "16:00",
+      "title": "Arrivo Ospiti",
+      "description": "Benvenuto con aperitivo di accoglienza"
+    },
+    {
+      "time": "16:30",
+      "title": "Cerimonia",
+      "description": "Cerimonia all'aperto nei giardini di Corte Maddalena"
+    },
+    {
+      "time": "17:30",
+      "title": "Aperitivo",
+      "description": "Cocktail e finger food nel giardino"
+    },
+    {
+      "time": "19:30",
+      "title": "Cena",
+      "description": "Cena sotto le stelle con prodotti tipici sardi"
+    },
+    {
+      "time": "22:00",
+      "title": "Taglio della Torta",
+      "description": "Il momento dolce della serata"
+    },
+    {
+      "time": "22:30",
+      "title": "Festa & Balli",
+      "description": "Musica, balli e divertimento fino a tarda notte"
+    }
+  ],
+  "ourStory": [
+    {
+      "year": "2019",
+      "title": "Il Primo Incontro",
+      "description": "Un incontro casuale che ha cambiato tutto. Tra sguardi e sorrisi, abbiamo capito che qualcosa di speciale stava nascendo.",
+      "image": "/images/gallery/story-1.jpg"
+    },
+    {
+      "year": "2020",
+      "title": "Il Primo Appuntamento",
+      "description": "Una passeggiata al tramonto che si è trasformata in una conversazione infinita. Non volevamo che quella serata finisse mai.",
+      "image": "/images/gallery/story-2.jpg"
+    },
+    {
+      "year": "2022",
+      "title": "La Convivenza",
+      "description": "Abbiamo deciso di costruire il nostro nido. Tra mobili da montare e cene bruciate, ogni giorno insieme era un'avventura.",
+      "image": "/images/gallery/story-3.jpg"
+    },
+    {
+      "year": "2025",
+      "title": "La Proposta",
+      "description": "In un momento perfetto, con il cuore che batteva forte, la domanda tanto attesa: 'Vuoi sposarmi?' E la risposta fu un sì urlato di gioia.",
+      "image": "/images/gallery/story-4.jpg"
+    }
+  ],
+  "gallery": [
+    { "src": "/images/gallery/photo-1.jpg", "alt": "Ele e Davi al tramonto", "category": "together" },
+    { "src": "/images/gallery/photo-2.jpg", "alt": "Passeggiata al mare", "category": "together" },
+    { "src": "/images/gallery/photo-3.jpg", "alt": "Viaggio insieme", "category": "travel" },
+    { "src": "/images/gallery/photo-4.jpg", "alt": "La proposta", "category": "engagement" },
+    { "src": "/images/gallery/photo-5.jpg", "alt": "Scherzi e risate", "category": "together" },
+    { "src": "/images/gallery/photo-6.jpg", "alt": "Avventura in montagna", "category": "travel" },
+    { "src": "/images/gallery/photo-7.jpg", "alt": "Cena romantica", "category": "together" },
+    { "src": "/images/gallery/photo-8.jpg", "alt": "Momenti speciali", "category": "engagement" }
+  ],
+  "accommodation": [
+    {
+      "name": "Hotel Calamosca",
+      "address": "Viale Calamosca 50, 09126 Cagliari",
+      "distance": "20 min dalla location",
+      "phone": "+39 070 371628",
+      "website": "https://www.hotelcalamosca.it",
+      "note": "Menzionare 'Matrimonio Ele & Davi' per tariffa convenzionata"
+    },
+    {
+      "name": "T Hotel",
+      "address": "Via dei Giudicati 66, 09131 Cagliari",
+      "distance": "25 min dalla location",
+      "phone": "+39 070 47400",
+      "website": "https://www.thotel.it",
+      "note": "Design hotel nel centro di Cagliari"
+    },
+    {
+      "name": "B&B Sa Domu",
+      "address": "Via Roma, 09012 Capoterra",
+      "distance": "5 min dalla location",
+      "phone": "+39 333 1234567",
+      "website": "#",
+      "note": "Soluzione intima e vicina alla location"
+    }
+  ],
+  "registry": {
+    "message": "La vostra presenza al nostro matrimonio è il regalo più bello che possiate farci. Se desiderate contribuire al nostro viaggio di nozze, potete farlo qui sotto.",
+    "paypalUrl": "https://www.paypal.com/paypalme/davidelonis",
+    "iban": "IT00 X000 0000 0000 0000 0000 000",
+    "experiences": [
+      {
+        "title": "Cena Romantica a Tokyo",
+        "description": "Una serata indimenticabile in un ristorante stellato nel cuore di Tokyo",
+        "price": 150,
+        "image": "🍣",
+        "icon": "utensils"
+      },
+      {
+        "title": "Volo per il Giappone",
+        "description": "Un passo in più verso la nostra avventura dall'altra parte del mondo",
+        "price": 200,
+        "image": "✈️",
+        "icon": "plane"
+      },
+      {
+        "title": "Notte in Ryokan",
+        "description": "Un'esperienza tradizionale giapponese con onsen privato e tatami",
+        "price": 180,
+        "image": "🏯",
+        "icon": "home"
+      },
+      {
+        "title": "Tour a Kyoto",
+        "description": "Templi, giardini zen e geishe: un giorno tra le meraviglie di Kyoto",
+        "price": 100,
+        "image": "⛩️",
+        "icon": "map-pin"
+      },
+      {
+        "title": "Escursione al Monte Fuji",
+        "description": "Un'avventura indimenticabile con vista sul monte sacro del Giappone",
+        "price": 120,
+        "image": "🗻",
+        "icon": "mountain"
+      },
+      {
+        "title": "Shopping a Shibuya",
+        "description": "Una giornata nel quartiere più iconico di Tokyo tra moda e cultura pop",
+        "price": 80,
+        "image": "🛍️",
+        "icon": "shopping-bag"
+      }
+    ]
+  },
+  "faq": [
+    {
+      "question": "La cerimonia e il ricevimento si svolgeranno nella stessa location?",
+      "answer": "Sì, Corte Maddalena ci ospiterà per l'intero evento."
+    },
+    {
+      "question": "Entro quando devo confermare?",
+      "answer": "Per favore conferma la tua presenza entro il 10 Maggio, così possiamo organizzarci al meglio."
+    },
+    {
+      "question": "Posso portare qualcuno?",
+      "answer": "Controlla il tuo invito per vedere se puoi portare un accompagnatore."
+    },
+    {
+      "question": "Dove posso parcheggiare?",
+      "answer": "C'è un ampio parcheggio all'ingresso della location."
+    },
+    {
+      "question": "Il matrimonio sarà all'interno o all'aperto?",
+      "answer": "La cerimonia e il ricevimento saranno all'aperto."
+    },
+    {
+      "question": "Possiamo scattare foto con i nostri telefoni e fotocamere durante il matrimonio?",
+      "answer": "Sì! Ci farebbe piacere che scattaste foto e le condivideste sulla nostra app Joy. Vi forniremo noi il link per condividere le foto."
+    },
+    {
+      "question": "Chi posso contattare per domande?",
+      "answer": "Per qualsiasi domanda scrivici su WhatsApp!"
+    }
+  ],
+  "contact": {
+    "email": "eleadavi2026@gmail.com",
+    "whatsappBride": "+39 333 0000000",
+    "whatsappGroom": "+39 333 0000001"
+  },
+  "quotes": [
+    "\"Qualunque cosa i nostri cuori desiderino, possa trovare la strada per realizzarsi.\"",
+    "\"In te ho trovato il mio posto nel mondo.\"",
+    "\"L'amore non si guarda a vicenda, ma guardare insieme nella stessa direzione.\""
+  ],
+  "sardiniaTips": [
+    {
+      "title": "Spiaggia di Chia",
+      "description": "A pochi km dalla location, acque cristalline e sabbia bianca.",
+      "type": "spiaggia"
+    },
+    {
+      "title": "Nora",
+      "description": "Sito archeologico fenicio-romano con vista mare mozzafiato.",
+      "type": "cultura"
+    },
+    {
+      "title": "Cagliari Centro Storico",
+      "description": "Passeggiata nel quartiere Castello con vista panoramica sulla città.",
+      "type": "cultura"
+    },
+    {
+      "title": "Ristorante Dal Corsaro",
+      "description": "Cucina sarda stellata nel cuore di Cagliari.",
+      "type": "ristorante"
+    },
+    {
+      "title": "Spiaggia di Tuerredda",
+      "description": "Una delle spiagge più belle della Sardegna meridionale.",
+      "type": "spiaggia"
+    }
+  ]
+}
