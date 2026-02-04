@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useInView } from '../hooks/useInView';
+import { cloudinaryListUrl, cloudinaryImageUrl, TAGS, CLOUDINARY_CLOUD_NAME } from '../config/cloudinary';
 
 const categories = [
   { key: 'all', label: 'Tutti' },
@@ -16,13 +17,22 @@ export default function Gallery() {
   const [lightboxIndex, setLightboxIndex] = useState(null);
   const [photos, setPhotos] = useState([]);
 
-  // Load from manifest
+  // Load from Cloudinary
   useEffect(() => {
-    fetch('/images/gallery/manifest.json')
-      .then((r) => r.json())
+    if (CLOUDINARY_CLOUD_NAME === 'YOUR_CLOUD_NAME') return;
+    fetch(cloudinaryListUrl(TAGS.GALLERY))
+      .then((r) => {
+        if (!r.ok) throw new Error();
+        return r.json();
+      })
       .then((data) => {
-        if (data.gallery && data.gallery.length > 0) {
-          setPhotos(data.gallery);
+        if (data.resources && data.resources.length > 0) {
+          setPhotos(data.resources.map((r) => ({
+            id: r.public_id,
+            src: cloudinaryImageUrl(r.public_id),
+            alt: r.context?.custom?.alt || '',
+            category: r.context?.custom?.category || 'together',
+          })));
         }
       })
       .catch(() => {});

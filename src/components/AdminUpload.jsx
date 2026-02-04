@@ -1,7 +1,14 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Upload, Trash2, Image, BookOpen, GripVertical, X, Check, ArrowLeft } from 'lucide-react';
-
-const API = 'http://localhost:3001/api';
+import { Upload, Trash2, Image, BookOpen, X, Check, ArrowLeft, ExternalLink } from 'lucide-react';
+import {
+  CLOUDINARY_UPLOAD_URL,
+  CLOUDINARY_UPLOAD_PRESET,
+  CLOUDINARY_CLOUD_NAME,
+  cloudinaryListUrl,
+  cloudinaryImageUrl,
+  cloudinaryThumbUrl,
+  TAGS,
+} from '../config/cloudinary';
 
 const CATEGORIES = [
   { value: 'together', label: 'Insieme' },
@@ -9,31 +16,55 @@ const CATEGORIES = [
   { value: 'engagement', label: 'Fidanzamento' },
 ];
 
+const isConfigured = CLOUDINARY_CLOUD_NAME !== 'YOUR_CLOUD_NAME';
+
 export default function AdminUpload() {
-  const [manifest, setManifest] = useState({ gallery: [], story: [] });
+  const [images, setImages] = useState([]);
   const [activeTab, setActiveTab] = useState('gallery');
   const [dragOver, setDragOver] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState('');
   const [pendingFiles, setPendingFiles] = useState([]);
   const [message, setMessage] = useState(null);
 
-  const fetchManifest = useCallback(async () => {
+  const fetchImages = useCallback(async () => {
+    if (!isConfigured) return;
     try {
-      const res = await fetch(`${API}/images`);
+      const tag = activeTab === 'gallery' ? TAGS.GALLERY : TAGS.STORY;
+      const res = await fetch(cloudinaryListUrl(tag));
+      if (!res.ok) {
+        if (res.status === 404) {
+          setImages([]);
+          return;
+        }
+        throw new Error(`HTTP ${res.status}`);
+      }
       const data = await res.json();
-      setManifest(data);
+      const imgs = (data.resources || []).map((r) => ({
+        id: r.public_id,
+        src: cloudinaryImageUrl(r.public_id),
+        thumb: cloudinaryThumbUrl(r.public_id),
+        alt: r.context?.custom?.alt || r.public_id.split('/').pop(),
+        category: r.context?.custom?.category || 'together',
+        year: r.context?.custom?.year || '',
+        title: r.context?.custom?.title || '',
+        description: r.context?.custom?.description || '',
+        uploadedAt: r.created_at,
+      }));
+      setImages(imgs);
     } catch {
-      setMessage({ type: 'error', text: 'Server upload non raggiungibile. Avvia con: npm run upload' });
+      // 404 means no images with this tag yet — not an error
+      setImages([]);
     }
-  }, []);
+  }, [activeTab]);
 
   useEffect(() => {
-    fetchManifest();
-  }, [fetchManifest]);
+    fetchImages();
+  }, [fetchImages]);
 
   const showMessage = (type, text) => {
     setMessage({ type, text });
-    setTimeout(() => setMessage(null), 4000);
+    setTimeout(() => setMessage(null), 5000);
   };
 
   // Handle file selection
@@ -63,72 +94,99 @@ export default function AdminUpload() {
     );
   };
 
-  // Upload all pending files
+  // Sanitize context values (no pipes or equals allowed)
+  const sanitize = (str) => str.replace(/[|=]/g, ' ').trim();
+
+  // Upload all pending files to Cloudinary
   const uploadAll = async () => {
-    if (pendingFiles.length === 0) return;
+    if (pendingFiles.length === 0 || !isConfigured) return;
     setUploading(true);
+    const results = [];
 
     try {
-      const formData = new FormData();
-      formData.append('type', activeTab);
+      for (let i = 0; i < pendingFiles.length; i++) {
+        const pf = pendingFiles[i];
+        setUploadProgress(`${i + 1} di ${pendingFiles.length}...`);
 
-      for (const pf of pendingFiles) {
-        formData.append('images', pf.file);
-        formData.append(`alt_${pf.file.name}`, pf.alt);
-        formData.append(`category_${pf.file.name}`, pf.category);
+        const formData = new FormData();
+        formData.append('file', pf.file);
+        formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+        formData.append('folder', `wedding/${activeTab}`);
+
+        const tag = activeTab === 'gallery' ? TAGS.GALLERY : TAGS.STORY;
+        formData.append('tags', tag);
+
+        // Context metadata
+        const ctx = [`alt=${sanitize(pf.alt)}`, `category=${sanitize(pf.category)}`];
         if (activeTab === 'story') {
-          formData.append(`year_${pf.file.name}`, pf.year);
-          formData.append(`title_${pf.file.name}`, pf.title);
-          formData.append(`desc_${pf.file.name}`, pf.description);
+          ctx.push(`year=${sanitize(pf.year)}`);
+          ctx.push(`title=${sanitize(pf.title)}`);
+          ctx.push(`description=${sanitize(pf.description)}`);
+        }
+        formData.append('context', ctx.join('|'));
+
+        const res = await fetch(CLOUDINARY_UPLOAD_URL, {
+          method: 'POST',
+          body: formData,
+        });
+        const data = await res.json();
+
+        if (data.secure_url) {
+          results.push({
+            id: data.public_id,
+            src: cloudinaryImageUrl(data.public_id),
+            thumb: cloudinaryThumbUrl(data.public_id),
+            alt: pf.alt,
+            category: pf.category,
+            year: pf.year,
+            title: pf.title,
+            description: pf.description,
+          });
+        } else {
+          throw new Error(data.error?.message || 'Upload fallito');
         }
       }
 
-      const res = await fetch(`${API}/upload`, { method: 'POST', body: formData });
-      const data = await res.json();
+      showMessage('success', `${results.length} foto caricate!`);
+      pendingFiles.forEach((pf) => URL.revokeObjectURL(pf.preview));
+      setPendingFiles([]);
+      setUploadProgress('');
 
-      if (data.ok) {
-        showMessage('success', `${data.uploaded.length} foto caricate!`);
-        pendingFiles.forEach((pf) => URL.revokeObjectURL(pf.preview));
-        setPendingFiles([]);
-        fetchManifest();
-      } else {
-        showMessage('error', data.error || 'Errore durante il caricamento');
-      }
+      // Optimistically add to local state (CDN cache refreshes in ~60s)
+      setImages((prev) => [...prev, ...results]);
     } catch (err) {
-      showMessage('error', 'Errore di connessione al server');
+      showMessage('error', `Errore: ${err.message}`);
+      setUploadProgress('');
     } finally {
       setUploading(false);
     }
   };
 
-  // Delete image
-  const deleteImage = async (id) => {
+  // Delete image via Netlify function
+  const deleteImage = async (publicId) => {
     if (!window.confirm('Eliminare questa foto?')) return;
     try {
-      const res = await fetch(`${API}/images/${id}`, { method: 'DELETE' });
-      const data = await res.json();
-      if (data.ok) {
+      const res = await fetch('/.netlify/functions/cloudinary-delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ public_id: publicId }),
+      });
+      if (res.ok) {
         showMessage('success', 'Foto eliminata');
-        fetchManifest();
+        setImages((prev) => prev.filter((img) => img.id !== publicId));
+      } else {
+        const data = await res.json();
+        showMessage('error', data.error || 'Errore eliminazione');
       }
     } catch {
-      showMessage('error', 'Errore eliminazione');
+      showMessage('error', 'Funzione di eliminazione non disponibile. Elimina da Cloudinary dashboard.');
     }
   };
 
   // Drag and drop handlers
-  const onDragOver = (e) => {
-    e.preventDefault();
-    setDragOver(true);
-  };
+  const onDragOver = (e) => { e.preventDefault(); setDragOver(true); };
   const onDragLeave = () => setDragOver(false);
-  const onDrop = (e) => {
-    e.preventDefault();
-    setDragOver(false);
-    handleFiles(e.dataTransfer.files);
-  };
-
-  const images = manifest[activeTab] || [];
+  const onDrop = (e) => { e.preventDefault(); setDragOver(false); handleFiles(e.dataTransfer.files); };
 
   return (
     <div style={{ minHeight: '100vh', background: '#f8f7f5', fontFamily: 'Montserrat, sans-serif' }}>
@@ -136,10 +194,7 @@ export default function AdminUpload() {
       <div style={{ background: '#3d3a37', color: '#f8f7f5', padding: '20px 24px' }}>
         <div style={{ maxWidth: '1000px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
-            <a
-              href="/"
-              style={{ color: '#d4a892', textDecoration: 'none', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '4px' }}
-            >
+            <a href="/" style={{ color: '#d4a892', textDecoration: 'none', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '4px' }}>
               <ArrowLeft size={14} /> Torna al sito
             </a>
             <h1 style={{ margin: 0, fontSize: '20px', fontWeight: 400, fontFamily: 'Cormorant Garamond, serif' }}>
@@ -153,21 +208,27 @@ export default function AdminUpload() {
       </div>
 
       <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '24px' }}>
+        {/* Config warning */}
+        {!isConfigured && (
+          <div style={{ padding: '16px 20px', marginBottom: '20px', background: '#fff3cd', color: '#856404', borderRadius: '4px', fontSize: '13px', lineHeight: 1.6 }}>
+            <strong>Configurazione necessaria:</strong> Apri <code>src/config/cloudinary.js</code> e sostituisci <code>YOUR_CLOUD_NAME</code> con il tuo Cloud Name di Cloudinary.
+            Devi anche creare un Upload Preset &quot;unsigned&quot; chiamato <code>wedding_ed2026</code> nel tuo account Cloudinary.
+            <br /><br />
+            <a href="https://cloudinary.com/users/register_free" target="_blank" rel="noopener noreferrer" style={{ color: '#856404' }}>
+              Crea un account gratuito su Cloudinary <ExternalLink size={12} style={{ display: 'inline', verticalAlign: 'middle' }} />
+            </a>
+          </div>
+        )}
+
         {/* Message */}
         {message && (
-          <div
-            style={{
-              padding: '12px 16px',
-              marginBottom: '16px',
-              background: message.type === 'error' ? '#f8d7da' : '#d4edda',
-              color: message.type === 'error' ? '#721c24' : '#155724',
-              borderRadius: '4px',
-              fontSize: '13px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-            }}
-          >
+          <div style={{
+            padding: '12px 16px', marginBottom: '16px',
+            background: message.type === 'error' ? '#f8d7da' : '#d4edda',
+            color: message.type === 'error' ? '#721c24' : '#155724',
+            borderRadius: '4px', fontSize: '13px',
+            display: 'flex', alignItems: 'center', gap: '8px',
+          }}>
             {message.type === 'success' ? <Check size={16} /> : <X size={16} />}
             {message.text}
           </div>
@@ -175,40 +236,24 @@ export default function AdminUpload() {
 
         {/* Tabs */}
         <div style={{ display: 'flex', gap: '8px', marginBottom: '24px' }}>
-          <button
-            onClick={() => { setActiveTab('gallery'); setPendingFiles([]); }}
-            style={{
-              padding: '10px 20px',
-              border: 'none',
-              cursor: 'pointer',
-              fontSize: '13px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              background: activeTab === 'gallery' ? '#3d3a37' : '#e8e4df',
-              color: activeTab === 'gallery' ? '#f8f7f5' : '#3d3a37',
-              transition: 'all 0.2s',
-            }}
-          >
-            <Image size={16} /> Galleria
-          </button>
-          <button
-            onClick={() => { setActiveTab('story'); setPendingFiles([]); }}
-            style={{
-              padding: '10px 20px',
-              border: 'none',
-              cursor: 'pointer',
-              fontSize: '13px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              background: activeTab === 'story' ? '#3d3a37' : '#e8e4df',
-              color: activeTab === 'story' ? '#f8f7f5' : '#3d3a37',
-              transition: 'all 0.2s',
-            }}
-          >
-            <BookOpen size={16} /> La Nostra Storia
-          </button>
+          {[
+            { key: 'gallery', label: 'Galleria', icon: Image },
+            { key: 'story', label: 'La Nostra Storia', icon: BookOpen },
+          ].map(({ key, label, icon: Icon }) => (
+            <button
+              key={key}
+              onClick={() => { setActiveTab(key); setPendingFiles([]); }}
+              style={{
+                padding: '10px 20px', border: 'none', cursor: 'pointer', fontSize: '13px',
+                display: 'flex', alignItems: 'center', gap: '6px',
+                background: activeTab === key ? '#3d3a37' : '#e8e4df',
+                color: activeTab === key ? '#f8f7f5' : '#3d3a37',
+                transition: 'all 0.2s',
+              }}
+            >
+              <Icon size={16} /> {label}
+            </button>
+          ))}
         </div>
 
         {/* Drop zone */}
@@ -219,13 +264,11 @@ export default function AdminUpload() {
           onClick={() => document.getElementById('file-input').click()}
           style={{
             border: `2px dashed ${dragOver ? '#d4a892' : '#ccc'}`,
-            borderRadius: '8px',
-            padding: '40px',
-            textAlign: 'center',
-            cursor: 'pointer',
+            borderRadius: '8px', padding: '40px', textAlign: 'center',
+            cursor: isConfigured ? 'pointer' : 'not-allowed',
             background: dragOver ? '#fdf6f3' : '#fff',
-            transition: 'all 0.2s',
-            marginBottom: '24px',
+            transition: 'all 0.2s', marginBottom: '24px',
+            opacity: isConfigured ? 1 : 0.5,
           }}
         >
           <Upload size={32} style={{ color: '#999', margin: '0 auto 12px' }} />
@@ -233,7 +276,7 @@ export default function AdminUpload() {
             Trascina le foto qui o <span style={{ color: '#d4a892', textDecoration: 'underline' }}>clicca per selezionarle</span>
           </p>
           <p style={{ margin: '8px 0 0', fontSize: '11px', color: '#999' }}>
-            JPG, PNG, WebP — max 20MB per file — le immagini vengono ottimizzate automaticamente
+            JPG, PNG, WebP — le immagini vengono ottimizzate automaticamente da Cloudinary
           </p>
           <input
             id="file-input"
@@ -242,6 +285,7 @@ export default function AdminUpload() {
             accept="image/*"
             style={{ display: 'none' }}
             onChange={(e) => handleFiles(e.target.files)}
+            disabled={!isConfigured}
           />
         </div>
 
@@ -252,33 +296,23 @@ export default function AdminUpload() {
               <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 500 }}>
                 {pendingFiles.length} foto da caricare
               </h3>
-              <div style={{ display: 'flex', gap: '8px' }}>
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                {uploadProgress && (
+                  <span style={{ fontSize: '12px', color: '#999' }}>{uploadProgress}</span>
+                )}
                 <button
-                  onClick={() => {
-                    pendingFiles.forEach((pf) => URL.revokeObjectURL(pf.preview));
-                    setPendingFiles([]);
-                  }}
-                  style={{
-                    padding: '8px 16px',
-                    border: '1px solid #ccc',
-                    background: '#fff',
-                    cursor: 'pointer',
-                    fontSize: '12px',
-                  }}
+                  onClick={() => { pendingFiles.forEach((pf) => URL.revokeObjectURL(pf.preview)); setPendingFiles([]); }}
+                  style={{ padding: '8px 16px', border: '1px solid #ccc', background: '#fff', cursor: 'pointer', fontSize: '12px' }}
                 >
-                  Annulla tutto
+                  Annulla
                 </button>
                 <button
                   onClick={uploadAll}
                   disabled={uploading}
                   style={{
-                    padding: '8px 20px',
-                    border: 'none',
-                    background: uploading ? '#999' : '#d4a892',
-                    color: '#fff',
-                    cursor: uploading ? 'not-allowed' : 'pointer',
-                    fontSize: '12px',
-                    fontWeight: 500,
+                    padding: '8px 20px', border: 'none',
+                    background: uploading ? '#999' : '#d4a892', color: '#fff',
+                    cursor: uploading ? 'not-allowed' : 'pointer', fontSize: '12px', fontWeight: 500,
                   }}
                 >
                   {uploading ? 'Caricamento...' : 'Carica tutte'}
@@ -288,44 +322,21 @@ export default function AdminUpload() {
 
             <div style={{ display: 'grid', gap: '12px' }}>
               {pendingFiles.map((pf, index) => (
-                <div
-                  key={index}
-                  style={{
-                    display: 'flex',
-                    gap: '16px',
-                    padding: '16px',
-                    background: '#fff',
-                    border: '1px solid #e8e4df',
-                    borderRadius: '4px',
-                    alignItems: 'flex-start',
-                  }}
-                >
-                  <img
-                    src={pf.preview}
-                    alt=""
-                    style={{ width: '100px', height: '100px', objectFit: 'cover', borderRadius: '4px', flexShrink: 0 }}
-                  />
-                  <div style={{ flex: 1, display: 'grid', gap: '8px', gridTemplateColumns: activeTab === 'story' ? '1fr 1fr' : '1fr 1fr' }}>
+                <div key={index} style={{
+                  display: 'flex', gap: '16px', padding: '16px', background: '#fff',
+                  border: '1px solid #e8e4df', borderRadius: '4px', alignItems: 'flex-start',
+                }}>
+                  <img src={pf.preview} alt="" style={{ width: '100px', height: '100px', objectFit: 'cover', borderRadius: '4px', flexShrink: 0 }} />
+                  <div style={{ flex: 1, display: 'grid', gap: '8px', gridTemplateColumns: '1fr 1fr' }}>
                     <div style={{ gridColumn: activeTab === 'story' ? '1 / -1' : 'auto' }}>
                       <label style={labelStyle}>Descrizione (alt text)</label>
-                      <input
-                        type="text"
-                        value={pf.alt}
-                        onChange={(e) => updatePending(index, 'alt', e.target.value)}
-                        style={inputStyle}
-                      />
+                      <input type="text" value={pf.alt} onChange={(e) => updatePending(index, 'alt', e.target.value)} style={inputStyle} />
                     </div>
                     {activeTab === 'gallery' && (
                       <div>
                         <label style={labelStyle}>Categoria</label>
-                        <select
-                          value={pf.category}
-                          onChange={(e) => updatePending(index, 'category', e.target.value)}
-                          style={inputStyle}
-                        >
-                          {CATEGORIES.map((c) => (
-                            <option key={c.value} value={c.value}>{c.label}</option>
-                          ))}
+                        <select value={pf.category} onChange={(e) => updatePending(index, 'category', e.target.value)} style={inputStyle}>
+                          {CATEGORIES.map((c) => <option key={c.value} value={c.value}>{c.label}</option>)}
                         </select>
                       </div>
                     )}
@@ -333,42 +344,20 @@ export default function AdminUpload() {
                       <>
                         <div>
                           <label style={labelStyle}>Anno</label>
-                          <input
-                            type="text"
-                            value={pf.year}
-                            onChange={(e) => updatePending(index, 'year', e.target.value)}
-                            placeholder="es. 2019"
-                            style={inputStyle}
-                          />
+                          <input type="text" value={pf.year} onChange={(e) => updatePending(index, 'year', e.target.value)} placeholder="es. 2019" style={inputStyle} />
                         </div>
                         <div>
                           <label style={labelStyle}>Titolo momento</label>
-                          <input
-                            type="text"
-                            value={pf.title}
-                            onChange={(e) => updatePending(index, 'title', e.target.value)}
-                            placeholder="es. Il Primo Incontro"
-                            style={inputStyle}
-                          />
+                          <input type="text" value={pf.title} onChange={(e) => updatePending(index, 'title', e.target.value)} placeholder="es. Il Primo Incontro" style={inputStyle} />
                         </div>
                         <div style={{ gridColumn: '1 / -1' }}>
                           <label style={labelStyle}>Racconto</label>
-                          <textarea
-                            value={pf.description}
-                            onChange={(e) => updatePending(index, 'description', e.target.value)}
-                            placeholder="Racconta questo momento..."
-                            rows={2}
-                            style={{ ...inputStyle, resize: 'vertical' }}
-                          />
+                          <textarea value={pf.description} onChange={(e) => updatePending(index, 'description', e.target.value)} placeholder="Racconta questo momento..." rows={2} style={{ ...inputStyle, resize: 'vertical' }} />
                         </div>
                       </>
                     )}
                   </div>
-                  <button
-                    onClick={() => removePending(index)}
-                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#999', padding: '4px', flexShrink: 0 }}
-                    title="Rimuovi"
-                  >
+                  <button onClick={() => removePending(index)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#999', padding: '4px', flexShrink: 0 }} title="Rimuovi">
                     <X size={18} />
                   </button>
                 </div>
@@ -384,30 +373,17 @@ export default function AdminUpload() {
 
         {images.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '40px', color: '#999', fontSize: '13px' }}>
-            Nessuna foto caricata. Trascina le foto nell'area sopra per iniziare.
+            {isConfigured
+              ? 'Nessuna foto caricata. Trascina le foto nell\'area sopra per iniziare.'
+              : 'Configura Cloudinary per iniziare.'}
           </div>
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '12px' }}>
             {images.map((img) => (
-              <div
-                key={img.id}
-                style={{
-                  position: 'relative',
-                  background: '#fff',
-                  border: '1px solid #e8e4df',
-                  borderRadius: '4px',
-                  overflow: 'hidden',
-                }}
-              >
-                <img
-                  src={img.src}
-                  alt={img.alt}
-                  style={{ width: '100%', aspectRatio: '1', objectFit: 'cover', display: 'block' }}
-                />
+              <div key={img.id} style={{ position: 'relative', background: '#fff', border: '1px solid #e8e4df', borderRadius: '4px', overflow: 'hidden' }}>
+                <img src={img.thumb} alt={img.alt} style={{ width: '100%', aspectRatio: '1', objectFit: 'cover', display: 'block' }} />
                 <div style={{ padding: '8px 10px' }}>
-                  <p style={{ margin: 0, fontSize: '11px', color: '#666', lineHeight: 1.4 }}>
-                    {img.alt}
-                  </p>
+                  <p style={{ margin: 0, fontSize: '11px', color: '#666', lineHeight: 1.4 }}>{img.alt}</p>
                   {img.year && (
                     <p style={{ margin: '4px 0 0', fontSize: '11px', color: '#d4a892' }}>
                       {img.year} — {img.title}
@@ -417,19 +393,9 @@ export default function AdminUpload() {
                 <button
                   onClick={() => deleteImage(img.id)}
                   style={{
-                    position: 'absolute',
-                    top: '6px',
-                    right: '6px',
-                    width: '28px',
-                    height: '28px',
-                    borderRadius: '50%',
-                    border: 'none',
-                    background: 'rgba(0,0,0,0.6)',
-                    color: '#fff',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
+                    position: 'absolute', top: '6px', right: '6px', width: '28px', height: '28px',
+                    borderRadius: '50%', border: 'none', background: 'rgba(0,0,0,0.6)', color: '#fff',
+                    cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
                   }}
                   title="Elimina"
                 >
@@ -439,26 +405,28 @@ export default function AdminUpload() {
             ))}
           </div>
         )}
+
+        {/* Info note */}
+        <div style={{ marginTop: '32px', padding: '16px', background: '#e8f4fd', borderRadius: '4px', fontSize: '12px', color: '#1a5276', lineHeight: 1.6 }}>
+          <strong>Note:</strong>
+          <ul style={{ margin: '8px 0 0', paddingLeft: '20px' }}>
+            <li>Le foto vengono caricate direttamente su Cloudinary (CDN globale)</li>
+            <li>Dopo il caricamento, le foto potrebbero impiegare fino a 60 secondi per apparire sul sito pubblico</li>
+            <li>Le immagini vengono ottimizzate automaticamente (formato WebP, ridimensionamento)</li>
+            <li>Non serve fare redeploy del sito: le foto appaiono automaticamente</li>
+          </ul>
+        </div>
       </div>
     </div>
   );
 }
 
 const labelStyle = {
-  display: 'block',
-  fontSize: '11px',
-  color: '#999',
-  textTransform: 'uppercase',
-  letterSpacing: '0.05em',
-  marginBottom: '4px',
+  display: 'block', fontSize: '11px', color: '#999',
+  textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px',
 };
 
 const inputStyle = {
-  width: '100%',
-  padding: '6px 10px',
-  border: '1px solid #ddd',
-  borderRadius: '3px',
-  fontSize: '13px',
-  fontFamily: 'inherit',
-  boxSizing: 'border-box',
+  width: '100%', padding: '6px 10px', border: '1px solid #ddd',
+  borderRadius: '3px', fontSize: '13px', fontFamily: 'inherit', boxSizing: 'border-box',
 };
